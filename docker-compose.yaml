@@ -1,0 +1,59 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: news_postgres
+    environment:
+      POSTGRES_DB: news_recommender
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      # store in project folder
+      - ./data/postgres:/var/lib/postgresql/data
+      # - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d news_recommender"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - news_network
+
+  # Redis (Cache + Message Broker)
+  redis:
+    image: redis:7-alpine
+    container_name: news_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      # store in project folder
+      - ./data/redis:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - news_network
+
+  # Celery Flower (Task Monitoring UI)
+  # Uncomment when you add Celery workers
+  # flower:
+  #   build: .
+  #   container_name: news_flower
+  #   command: celery -A backend.workers.celery_app flower --port=5555
+  #   ports:
+  #     - "5555:5555"
+  #   environment:
+  #     - CELERY_BROKER_URL=redis://redis:6379/0
+  #   depends_on:
+  #     - redis
+  #   networks:
+  #     - news_network
+
+networks:
+  news_network:
+    driver: bridge
