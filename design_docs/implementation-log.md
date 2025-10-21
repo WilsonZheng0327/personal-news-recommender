@@ -30,7 +30,11 @@ TestGen-LLM is an implementation of the approach described in the paper "Automat
 
 - docker-compose
 
+### [Date: 2025-10-20]
 
+- you gotta open docker desktop to run the dockers lol
+- scripts/test_connection.py runs successfully
+- finished setup.md aight cool good stuff
 
 **Issues & Solutions**:
 1. ...

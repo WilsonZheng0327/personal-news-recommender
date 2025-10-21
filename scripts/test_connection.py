@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 # Create scripts/test_connection.py
 from backend.db.database import engine
 from sqlalchemy import text
