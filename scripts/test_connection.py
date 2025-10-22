@@ -10,10 +10,10 @@ def test_connection():
     try:
         with engine.connect() as conn:
             result = conn.execute(text("SELECT 1"))
-            print("✅ Database connection successful!")
+            print("SUCCESS: Database connection successful!")
             print(f"Result: {result.scalar()}")
     except Exception as e:
-        print(f"❌ Database connection failed: {e}")
+        print(f"ERROR: Database connection failed: {e}")
 
 
 import redis
@@ -24,14 +24,14 @@ def test_redis():
     try:
         r = redis.from_url(settings.redis_url)
         r.ping()
-        print("✅ Redis connection successful!")
+        print("SUCCESS: Redis connection successful!")
         
         # Test set/get
         r.set("test_key", "Hello Redis!")
         value = r.get("test_key")
         print(f"Test value: {value.decode('utf-8')}")
     except Exception as e:
-        print(f"❌ Redis connection failed: {e}")
+        print(f"ERROR: Redis connection failed: {e}")
 
 if __name__ == "__main__":
     test_connection()

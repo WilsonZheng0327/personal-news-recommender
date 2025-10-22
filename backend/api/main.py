@@ -6,6 +6,7 @@ from fastapi import FastAPI, Response, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timezone
@@ -232,7 +233,64 @@ async def log_interaction(
     - **like**: User liked the article
     - **skip**: User skipped the article
     """
-    # Create database object
+    # Validate that user exists
+    user = db.query(User).filter(User.id == interaction.user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User with ID {interaction.user_id} not found"
+        )
+    
+    # Validate that article exists
+    article = db.query(Article).filter(Article.id == interaction.article_id).first()
+    if not article:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Article with ID {interaction.article_id} not found"
+        )
+    
+    # Handle different interaction types with appropriate logic
+    if interaction.interaction_type == "like":
+        # For likes, check if already liked (prevent duplicate likes)
+        existing_like = db.query(Interaction).filter(
+            Interaction.user_id == interaction.user_id,
+            Interaction.article_id == interaction.article_id,
+            Interaction.interaction_type == "like"
+        ).first()
+        
+        if existing_like:
+            # User already liked - remove the like (toggle behavior)
+            db.delete(existing_like)
+            db.commit()
+            return {
+                "status": "success",
+                "message": "Like removed"
+            }
+    
+    elif interaction.interaction_type == "read":
+        # For reads, update existing read interaction or create new one
+        existing_read = db.query(Interaction).filter(
+            Interaction.user_id == interaction.user_id,
+            Interaction.article_id == interaction.article_id,
+            Interaction.interaction_type == "read"
+        ).first()
+        
+        if existing_read:
+            # Update existing read with new timestamp and read time
+            existing_read.timestamp = datetime.now(timezone.utc)
+            if interaction.read_time_seconds is not None:
+                existing_read.read_time_seconds = interaction.read_time_seconds
+            db.commit()
+            db.refresh(existing_read)
+            
+            return {
+                "status": "success",
+                "message": "Read interaction updated"
+            }
+    
+    # For clicks and skips, always allow multiple (track all instances)
+    
+    # Create new interaction
     db_interaction = Interaction(**interaction.model_dump())
     
     db.add(db_interaction)
@@ -291,7 +349,7 @@ async def get_stats(db: Session = Depends(get_db)):
     interaction_count = db.query(Interaction).count()
     
     # Get topic distribution
-    topics = db.query(Article.topic, db.func.count(Article.id))\
+    topics = db.query(Article.topic, func.count(Article.id))\
         .filter(Article.topic.isnot(None))\
         .group_by(Article.topic)\
         .all()

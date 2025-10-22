@@ -17,7 +17,7 @@ def test_health():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"
-    print("✓ Health check passed")
+    print("SUCCESS: Health check passed")
 
 
 def test_root():
@@ -26,7 +26,7 @@ def test_root():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"
-    print("✓ Root endpoint works")
+    print("SUCCESS: Root endpoint works")
 
 
 def test_get_articles():
@@ -34,7 +34,7 @@ def test_get_articles():
     response = requests.get(f"{BASE_URL}/api/articles")
     assert response.status_code == 200
     articles = response.json()
-    print(f"✓ Found {len(articles)} articles")
+    print(f"SUCCESS: Found {len(articles)} articles")
     return articles
 
 
@@ -45,7 +45,7 @@ def test_get_articles_with_filters():
     assert response.status_code == 200
     articles = response.json()
     assert len(articles) <= 5
-    print(f"✓ Pagination works (got {len(articles)} articles)")
+    print(f"SUCCESS: Pagination works (got {len(articles)} articles)")
 
 
 def test_article_count():
@@ -53,7 +53,7 @@ def test_article_count():
     response = requests.get(f"{BASE_URL}/api/articles/count")
     assert response.status_code == 200
     data = response.json()
-    print(f"✓ Total articles in DB: {data['count']}")
+    print(f"SUCCESS: Total articles in DB: {data['count']}")
 
 
 def test_recent_articles():
@@ -61,7 +61,7 @@ def test_recent_articles():
     response = requests.get(f"{BASE_URL}/api/articles/recent?limit=5")
     assert response.status_code == 200
     articles = response.json()
-    print(f"✓ Got {len(articles)} recent articles")
+    print(f"SUCCESS: Got {len(articles)} recent articles")
 
 
 def test_get_single_article(article_id):
@@ -69,7 +69,7 @@ def test_get_single_article(article_id):
     response = requests.get(f"{BASE_URL}/api/articles/{article_id}")
     assert response.status_code == 200
     article = response.json()
-    print(f"✓ Retrieved article: {article['title'][:50]}...")
+    print(f"SUCCESS: Retrieved article: {article['title'][:50]}...")
     assert "content" in article  # DetailResponse has content
     return article
 
@@ -80,7 +80,7 @@ def test_404_error():
     assert response.status_code == 404
     error = response.json()
     assert "detail" in error
-    print("✓ 404 error handling works")
+    print("SUCCESS: 404 error handling works")
 
 
 def test_log_interaction():
@@ -95,7 +95,7 @@ def test_log_interaction():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
-    print("✓ Interaction logged successfully")
+    print("SUCCESS: Interaction logged successfully")
 
 
 def test_get_user_interactions():
@@ -103,7 +103,7 @@ def test_get_user_interactions():
     response = requests.get(f"{BASE_URL}/api/interactions/1")
     assert response.status_code == 200
     interactions = response.json()
-    print(f"✓ User has {len(interactions)} interactions")
+    print(f"SUCCESS: User has {len(interactions)} interactions")
 
 
 def test_stats():
@@ -111,7 +111,7 @@ def test_stats():
     response = requests.get(f"{BASE_URL}/api/stats")
     assert response.status_code == 200
     stats = response.json()
-    print(f"✓ System stats:")
+    print(f"SUCCESS: System stats:")
     print(f"  - Articles: {stats['total_articles']}")
     print(f"  - Users: {stats['total_users']}")
     print(f"  - Interactions: {stats['total_interactions']}")
@@ -121,7 +121,7 @@ def test_stats():
 
 def run_all_tests():
     """Run all tests"""
-    print("🧪 Starting API tests...\n")
+    print("Starting API tests...\n")
     
     try:
         # Health checks
@@ -153,15 +153,15 @@ def run_all_tests():
         test_stats()
         print()
         
-        print("✅ All tests passed!")
+        print("SUCCESS: All tests passed!")
         
     except AssertionError as e:
-        print(f"\n❌ Test failed: {e}")
+        print(f"\nERROR: Test failed: {e}")
     except requests.exceptions.ConnectionError:
-        print("\n❌ Could not connect to API. Is it running?")
+        print("\nERROR: Could not connect to API. Is it running?")
         print("   Run: uvicorn backend.api.main:app --reload")
     except Exception as e:
-        print(f"\n❌ Unexpected error: {e}")
+        print(f"\nERROR: Unexpected error: {e}")
         import traceback
         traceback.print_exc()
 
