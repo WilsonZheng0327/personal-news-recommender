@@ -23,6 +23,11 @@ from backend.api.schemas import (
     SuccessResponse,
     HealthResponse,
     CountResponse,
+    ClassifyTextRequest,
+    ClassifyArticleRequest,
+    ClassificationResult,
+    BatchClassifyRequest,
+    BatchClassificationResponse,
 )
 
 settings = get_settings()
@@ -365,7 +370,168 @@ async def get_stats(db: Session = Depends(get_db)):
     }
 
 
+# =================================================================
+# ==================== Classification Endpoints ====================
+# =================================================================
 
+@app.post(
+    "/api/classify/text",
+    response_model=ClassificationResult,
+    tags=["classification"],
+    summary="Classify raw text",
+    description="Classify a piece of text into one of 4 topics using the fine-tuned model"
+)
+async def classify_text_endpoint(request: ClassifyTextRequest):
+    """
+    Classify raw text into one of 4 topics.
+
+    Topics:
+    - World (0): International news, politics, global events
+    - Sports (1): Sports news, games, athletes
+    - Business (2): Financial news, markets, companies
+    - Sci/Tech (3): Science, technology, innovation
+
+    Returns topic prediction with confidence score.
+    """
+    from backend.ml import classify_text
+
+    try:
+        result = classify_text(
+            request.text,
+            return_all_scores=request.return_all_scores
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Classification error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Classification failed: {str(e)}"
+        )
+
+
+@app.post(
+    "/api/classify/article/{article_id}",
+    response_model=ClassificationResult,
+    tags=["classification"],
+    summary="Classify article by ID",
+    description="Classify an existing article from the database"
+)
+async def classify_article_endpoint(
+    article_id: int,
+    return_all_scores: bool = Query(False, description="Return scores for all topics"),
+    db: Session = Depends(get_db)
+):
+    """
+    Classify an article that's already in the database.
+
+    Useful for:
+    - Testing the classifier on real articles
+    - Re-classifying articles
+    - Getting classification without saving to database
+    """
+    from backend.ml import classify_text
+
+    # Get article from database
+    article = db.query(Article).filter(Article.id == article_id).first()
+
+    if not article:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Article with ID {article_id} not found"
+        )
+
+    if not article.content:
+        raise HTTPException(
+            status_code=400,
+            detail="Article has no content to classify"
+        )
+
+    try:
+        result = classify_text(
+            article.content,
+            return_all_scores=return_all_scores
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Classification error for article {article_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Classification failed: {str(e)}"
+        )
+
+
+@app.post(
+    "/api/classify/batch",
+    response_model=BatchClassificationResponse,
+    tags=["classification"],
+    summary="Classify multiple texts",
+    description="Classify multiple texts efficiently in a single request"
+)
+async def classify_batch_endpoint(request: BatchClassifyRequest):
+    """
+    Classify multiple texts in batch for better performance.
+
+    - Up to 100 texts per request
+    - Processes texts in batches of 16 for efficiency
+    - Returns results in the same order as input
+    """
+    from backend.ml import get_classifier
+    import time
+
+    if not request.texts:
+        raise HTTPException(
+            status_code=400,
+            detail="No texts provided"
+        )
+
+    try:
+        classifier = get_classifier()
+
+        start_time = time.time()
+        results = classifier.classify_batch(request.texts, batch_size=16)
+        elapsed = (time.time() - start_time) * 1000  # Convert to ms
+
+        return {
+            "results": results,
+            "total": len(results),
+            "processing_time_ms": round(elapsed, 2)
+        }
+    except Exception as e:
+        logger.error(f"Batch classification error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Batch classification failed: {str(e)}"
+        )
+
+
+@app.get(
+    "/api/classify/model-info",
+    tags=["classification"],
+    summary="Get model information",
+    description="Get information about the loaded classification model"
+)
+async def get_model_info():
+    """
+    Get metadata about the classification model.
+
+    Returns:
+    - Model status (loaded/not loaded)
+    - Model type
+    - Available topics
+    - Device (CPU/GPU)
+    """
+    from backend.ml import get_classifier
+
+    try:
+        classifier = get_classifier()
+        info = classifier.get_model_info()
+        return info
+    except Exception as e:
+        logger.error(f"Error getting model info: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get model info: {str(e)}"
+        )
 
 
 if __name__ == "__main__":

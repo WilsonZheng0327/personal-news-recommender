@@ -40,7 +40,19 @@ TestGen-LLM is an implementation of the approach described in the paper "Automat
 
 - all basic APIs working
 - interactions won't work without any existing user
-- 
+
+### [Date: 2025-10-22]
+
+- classifier working
+    - passing in title + content
+
+
+**To do**
+1. Load & test your fine-tuned model (create backend/ml/classifier.py)
+2. Create embedding generator (create backend/ml/embedder.py)
+3. Set up FAISS (create backend/ml/vector_store.py)
+4. Build processing script (create backend/processors/article_processor.py)
+5. Add recommendation endpoint to main.py
 
 **Dev commands**
 1. .\venv\Scripts\activate

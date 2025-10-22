@@ -104,3 +104,56 @@ class HealthResponse(BaseModel):
 class CountResponse(BaseModel):
     """Response with count"""
     count: int
+
+
+# ==================== Classification Schemas ====================
+
+class ClassifyTextRequest(BaseModel):
+    """Request schema for classifying raw text"""
+    text: str = Field(
+        ...,
+        description="Text to classify",
+        min_length=1,
+        max_length=10000
+    )
+    return_all_scores: bool = Field(
+        False,
+        description="If True, return confidence scores for all topics"
+    )
+
+
+class ClassifyArticleRequest(BaseModel):
+    """Request schema for classifying an article by ID"""
+    article_id: int = Field(..., description="ID of the article to classify", ge=1)
+    return_all_scores: bool = Field(
+        False,
+        description="If True, return confidence scores for all topics"
+    )
+
+
+class ClassificationResult(BaseModel):
+    """Response schema for classification result"""
+    topic: str = Field(..., description="Predicted topic")
+    confidence: float = Field(..., description="Confidence score (0-1)", ge=0, le=1)
+    topic_id: int = Field(..., description="Topic ID (0-3)")
+    all_scores: dict[str, float] | None = Field(
+        None,
+        description="Confidence scores for all topics (if requested)"
+    )
+
+
+class BatchClassifyRequest(BaseModel):
+    """Request schema for batch classification"""
+    texts: list[str] = Field(
+        ...,
+        description="List of texts to classify",
+        min_length=1,
+        max_length=100
+    )
+
+
+class BatchClassificationResponse(BaseModel):
+    """Response schema for batch classification"""
+    results: list[ClassificationResult]
+    total: int
+    processing_time_ms: float
