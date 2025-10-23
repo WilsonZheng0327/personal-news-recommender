@@ -43,16 +43,47 @@ TestGen-LLM is an implementation of the approach described in the paper "Automat
 
 ### [Date: 2025-10-22]
 
-- classifier working
-    - passing in title + content
+- **Implemented Topic Classifier Module** ✓
+    - Created `backend/ml/classifier.py` with TopicClassifier class
+    - Singleton pattern, thread-safe, production-ready
+    - Supports batch processing (276 texts/second on CPU)
+    - Inference time: ~3.6ms per article
 
+- **Added Classification API Endpoints** ✓
+    - POST `/api/classify/text` - Classify raw text
+    - POST `/api/classify/article/{id}` - Classify article by ID
+    - POST `/api/classify/batch` - Batch classification (up to 100 texts)
+    - GET `/api/classify/model-info` - Model metadata
+    - All endpoints tested and working
+
+- **Deployment-Friendly Design**
+    - Model path configurable via `.env` (TOPIC_CLASSIFIER_PATH)
+    - Easy to switch between local/S3/cloud storage
+    - Auto device detection (CPU/GPU)
+
+- **Test Scripts Created**
+    - `scripts/test_classifier.py` - Unit tests for classifier
+    - `scripts/test_classify_api.py` - API endpoint tests
+    - All tests passing
+
+- `__init__.py` specificies that the folder is a package
+    - `__all__` specifies what's public API
+    - when importing, doesn't need to know exact file structures
+    - i.e.  `from backend.ml.embedder import ...` to \
+        `from backend.ml import ...`
+
+- implemented FAISS with basic operations
+    - singleton, consistent with classifier and embedder
 
 **To do**
-1. Load & test your fine-tuned model (create backend/ml/classifier.py)
-2. Create embedding generator (create backend/ml/embedder.py)
-3. Set up FAISS (create backend/ml/vector_store.py)
+1. ~~Load & test your fine-tuned model (create backend/ml/classifier.py)~~
+2. ~~Create embedding generator (create backend/ml/embedder.py)~~
+3. ~~Set up FAISS (create backend/ml/vector_store.py)~~
 4. Build processing script (create backend/processors/article_processor.py)
 5. Add recommendation endpoint to main.py
+
+**Future improvements**
+- FAISS save timings (after batch? periodic?)
 
 **Dev commands**
 1. .\venv\Scripts\activate

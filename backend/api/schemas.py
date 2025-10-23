@@ -102,7 +102,7 @@ class HealthResponse(BaseModel):
 
 
 class CountResponse(BaseModel):
-    """Response with count"""
+    """Response with count of articles"""
     count: int
 
 

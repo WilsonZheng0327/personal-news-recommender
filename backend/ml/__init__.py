@@ -8,9 +8,22 @@ This module contains ML-related functionality:
 """
 
 from .classifier import TopicClassifier, get_classifier, classify_text
+from .embedder import ArticleEmbedder, get_embedder, embed_text, embed_batch
+from .vector_store import FAISSVectorStore, get_vector_store
 
 __all__ = [
+    # Classifier
     "TopicClassifier",
     "get_classifier",
-    "classify_text"
+    "classify_text",
+
+    # Embedder
+    "ArticleEmbedder",
+    "get_embedder",
+    "embed_text",
+    "embed_batch",
+
+    # Vector Store
+    "FAISSVectorStore",
+    "get_vector_store",
 ]
