@@ -75,6 +75,20 @@ TestGen-LLM is an implementation of the approach described in the paper "Automat
 - implemented FAISS with basic operations
     - singleton, consistent with classifier and embedder
 
+### [Date: 2025-10-23]
+
+<u>Regarding Redis and Celery URLs</u>
+
+- **Why same URL is fine for you**: Your project processes ~100-1000 articles at moderate frequency, so a single Redis instance can easily handle both task queuing (broker) and storing results (backend) without performance issues. Results also expire after 1 hour, so you won't accumulate data. 
+- If you want more separation: Use different Redis databases (same Redis instance, different databases): \
+    `redis://localhost:6379/0` for broker \
+    `redis://localhost:6379/1` for results \
+    to isolate them, or use PostgreSQL for the result backend (postgresql://admin:password@localhost:5432/news_recommender) if you need to query old task results or want permanent storage.
+- Or differnet Redis instances (separate servers, true separation) \
+    `redis://redis-broker:6379/0` \
+    `redis://redis-results:6379/0` 
+
+
 **To do**
 1. ~~Load & test your fine-tuned model (create backend/ml/classifier.py)~~
 2. ~~Create embedding generator (create backend/ml/embedder.py)~~
@@ -89,4 +103,6 @@ TestGen-LLM is an implementation of the approach described in the paper "Automat
 1. .\venv\Scripts\activate
 2. uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000
 3. docker-compose up -d
-4. docker-compose down
+4. celery -A backend.celery_app flower
+
+docker-compose down

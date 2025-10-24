@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     topic_classifier_path: str
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     faiss_index_path: str = "data/faiss_index"
+
+    # Article Processing
+    processing_batch_size: int = 50
+    processing_interval_minutes: int = 10
     
     # Subclass that tells Pydantic to load from .env file
     class Config:

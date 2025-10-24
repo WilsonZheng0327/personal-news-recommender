@@ -24,6 +24,11 @@ class Article(Base):
     topic = Column(String, nullable=True)  # Will be filled by classifier
     topic_confidence = Column(Float, nullable=True)
     embedding_id = Column(Integer, nullable=True)  # FAISS index position
+
+    # Processing status tracking
+    processing_status = Column(String, default="pending")  # pending, processing, completed, failed
+    processed_at = Column(DateTime, nullable=True)  # When processing completed
+    processing_error = Column(Text, nullable=True)  # Error message if failed
     
     # Metadata
     author = Column(String, nullable=True)

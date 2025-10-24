@@ -26,13 +26,13 @@ RSS_FEEDS = [
     "https://www.engadget.com/rss.xml",
     
     # Reddit (very easy)
-    "https://www.reddit.com/r/worldnews/.rss",
-    "https://www.reddit.com/r/technology/.rss",
-    "https://www.reddit.com/r/science/.rss",
+    # "https://www.reddit.com/r/worldnews/.rss",
+    # "https://www.reddit.com/r/technology/.rss",
+    # "https://www.reddit.com/r/science/.rss",
     
     # BBC (sometimes works)
-    "http://feeds.bbci.co.uk/news/rss.xml",
-    "http://feeds.bbci.co.uk/news/technology/rss.xml",
+    # "http://feeds.bbci.co.uk/news/rss.xml",
+    # "http://feeds.bbci.co.uk/news/technology/rss.xml",
     
     # Alternative news aggregators
     "https://news.ycombinator.com/rss",
