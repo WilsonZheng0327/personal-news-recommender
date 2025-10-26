@@ -345,7 +345,7 @@ def reprocess_failed_articles() -> Dict:
             "status": "error",
             "message": str(e)
         }
-
+    
 
 @celery_app.task(name="backend.tasks.processing_tasks.get_processing_stats")
 def get_processing_stats() -> Dict:
@@ -386,3 +386,11 @@ def get_processing_stats() -> Dict:
             "status": "error",
             "message": str(e)
         }
+
+
+@celery_app.task(name="backend.tasks.processing_tasks.test_task")
+def test_task() -> Dict:
+    return {
+        "status": "success",
+        "message": "test task 0_0"
+    }

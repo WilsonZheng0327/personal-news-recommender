@@ -88,6 +88,14 @@ TestGen-LLM is an implementation of the approach described in the paper "Automat
     `redis://redis-broker:6379/0` \
     `redis://redis-results:6379/0` 
 
+### [Date: 2025-10-25]
+
+- setup Celery
+- distributed task queue for executing background jobs in Python
+- check `design_docs/celery.md` for more info
+- for manual testing, call by executing \
+    `result = task_name.delay(task_params)`
+
 
 **To do**
 1. ~~Load & test your fine-tuned model (create backend/ml/classifier.py)~~
@@ -103,6 +111,8 @@ TestGen-LLM is an implementation of the approach described in the paper "Automat
 1. .\venv\Scripts\activate
 2. uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000
 3. docker-compose up -d
-4. celery -A backend.celery_app flower
+4. celery -A backend.celery_app worker --pool=solo --loglevel=info -Q celery,processing,scraping
+5. celery -A backend.celery_app beat --loglevel=info
+6. celery -A backend.celery_app flower
 
 docker-compose down

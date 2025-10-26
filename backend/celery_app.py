@@ -51,7 +51,8 @@ celery_app.conf.update(
     enable_utc=True,
 
     # Task execution
-    task_acks_late=True,  # Acknowledge task after completion (safer)
+    task_acks_late=True,    # Acknowledge task after completion (safer)
+                            # if False, task stuck forever if fails
     task_reject_on_worker_lost=True,  # Requeue if worker crashes
 
     # Result backend settings
@@ -59,8 +60,10 @@ celery_app.conf.update(
     result_extended=True,  # Store additional metadata
 
     # Worker settings
-    worker_prefetch_multiplier=1,  # Process one task at a time (safer for ML models)
-    worker_max_tasks_per_child=50,  # Restart worker after 50 tasks (prevent memory leaks)
+    worker_prefetch_multiplier=1,   # Process one task at a time (safer for ML models)
+                                    # how many tasks a worker picks up each time
+                                    # and stores in local queue (not available to others)
+    worker_max_tasks_per_child=10,  # Restart worker after 50 tasks (prevent memory leaks)
 
     # Retry settings
     task_autoretry_for=(Exception,),  # Auto-retry on any exception
@@ -86,11 +89,22 @@ celery_app.conf.beat_schedule = {
         "schedule": crontab(minute=0),  # Every hour at :00
         "options": {"queue": "processing"}
     },
+
+    # Test task (uses default queue for simplicity)
+    "test-task": {
+        "task": "backend.tasks.processing_tasks.test_task",
+        "schedule": crontab(minute='*'),
+    }
 }
 
 # Task routing (optional - route different tasks to different queues)
 celery_app.conf.task_routes = {
-    "backend.tasks.processing_tasks.*": {"queue": "processing"},
+    "backend.tasks.processing_tasks.process_pending_articles": {"queue": "processing"},
+    "backend.tasks.processing_tasks.process_single_article": {"queue": "processing"},
+    "backend.tasks.processing_tasks.save_faiss_index": {"queue": "processing"},
+    "backend.tasks.processing_tasks.reprocess_failed_articles": {"queue": "processing"},
+    "backend.tasks.processing_tasks.get_processing_stats": {"queue": "processing"},
+    # test_task uses default queue
     "backend.tasks.scraping_tasks.*": {"queue": "scraping"},  # For future scraping tasks
 }
 
