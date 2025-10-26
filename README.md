@@ -15,6 +15,7 @@ A personalized news recommendation platform with ML-powered topic classification
 - Python 3.10+
 - Docker & Docker Compose
 - 8GB RAM
+- **Model files not pushed**
 
 ### Setup
 ```bash
