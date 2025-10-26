@@ -18,9 +18,8 @@ A personalized news recommendation platform with ML-powered topic classification
 
 ### Setup
 ```bash
-# Clone and setup
-git clone <your-repo>
-cd news-recommender
+# Clone this repo and create new venv
+cd personal-news-recommender
 python -m venv venv
 . venv/bin/activate && pip install -r requirements.txt
 
