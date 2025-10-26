@@ -18,20 +18,21 @@ A personalized news recommendation platform with ML-powered topic classification
 
 ### Setup
 ```bash
-# Clone and setup
-git clone <your-repo>
-cd news-recommender
-make setup
+# Clone this repo and create new venv
+cd personal-news-recommender
+python -m venv venv
+. venv/bin/activate && pip install -r requirements.txt
 
 # Configure environment
 # Edit .env with your settings
 
 # Start services
-make start
+docker-compose up -d
 
 # Initialize database
 python scripts/init_db.py
 
-# Run the app (in another terminal)
-source venv/bin/activate
-uvicorn backend.api.main:app --reload
+# Run the app (in different terminals)
+uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000
+celery -A backend.celery_app worker --pool=solo --loglevel=info -Q celery,processing,scraping
+celery -A backend.celery_app beat --loglevel=info
